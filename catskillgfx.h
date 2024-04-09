@@ -10,7 +10,7 @@
 #define COLS 240
 #define BYTES_PER_PIXEL 3
 
-extern guchar playfield[ROWS * COLS * BYTES_PER_PIXEL];
+extern uint8_t playfield[ROWS * COLS * BYTES_PER_PIXEL];
 
 void initGfx();
 void setButton(uint8_t button);

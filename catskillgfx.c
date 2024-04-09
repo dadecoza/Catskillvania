@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-guchar playfield[ROWS * COLS * BYTES_PER_PIXEL];
+uint8_t playfield[ROWS * COLS * BYTES_PER_PIXEL];
 
 FILE *file;
 
@@ -1003,7 +1003,7 @@ uint8_t fineYsubCount = 0;
 uint8_t fineYpointer; // = winYfine;
 uint8_t coarseY;      // = winY;
 uint16_t *sp;         // = &spriteBuffer[0];
-guchar *pp;           // = &playfield[0];
+uint8_t *pp;           // = &playfield[0];
 
 uint8_t renderRow = 0;
 
@@ -1027,9 +1027,9 @@ void drawLineOfPlayfield(const uint16_t *data, int whatSize)
     for (int i = 0; i < whatSize; i++)
     {
         uint16_t rgb565 = *data++;
-        guchar r = (rgb565 & 0xF800) >> 8;
-        guchar g = (rgb565 & 0x07E0) >> 3;
-        guchar b = (rgb565 & 0x001F) << 3;
+        uint8_t r = (rgb565 & 0xF800) >> 8;
+        uint8_t g = (rgb565 & 0x07E0) >> 3;
+        uint8_t b = (rgb565 & 0x001F) << 3;
         *pp++ = r;
         *pp++ = g;
         *pp++ = b;

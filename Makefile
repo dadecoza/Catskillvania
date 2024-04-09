@@ -1,4 +1,4 @@
-CFLAGS = -Wall -g `pkg-config --cflags gtk+-3.0` -lm -lpthread -mwindows
+CFLAGS = -Wall -g `pkg-config --cflags gtk+-3.0` -lm -lpthread
 LDFLAGS = `pkg-config --libs gtk+-3.0`
 
 all: main.c

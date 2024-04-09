@@ -72,6 +72,7 @@ void playAudio(const char *path, int newPriority);
 void stopAudio();
 void serviceAudio();
 bool fillAudioBuffer(int whichOne);
+void initAudio();
 
 bool checkFile(const char *path);
 void saveFile(const char *path);

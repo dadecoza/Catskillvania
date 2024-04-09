@@ -1,9 +1,11 @@
 // Game & graphics driver for gameBadgePico (MGC 2023)
+#define MINIAUDIO_IMPLEMENTATION
 #include "catskillgfx.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "miniaudio.h"
 
 uint8_t playfield[ROWS * COLS * BYTES_PER_PIXEL];
 
@@ -43,6 +45,9 @@ int yBottom = 120;
 uint32_t audioSamples = 0;
 uint8_t whichAudioBuffer = 0;
 bool audioPlaying = false;
+ma_result result;
+ma_engine engine;
+ma_sound sound;
 
 #define audioBufferSize 512
 uint32_t audioBuffer0[audioBufferSize] __attribute__((aligned(audioBufferSize)));
@@ -109,10 +114,10 @@ void setButton(uint8_t b, bool down)
         buttonValue = no_but;
     }
     buttonDown[buttonValue] = down;
-    if (!down) {
+    if (!down)
+    {
         buttonValue = no_but;
     }
-    
 }
 
 // Returns a boolean of the button state, using debounce settings
@@ -150,6 +155,7 @@ void initGfx()
         playfield[p++] = 0;
         playfield[p++] = 0;
     }
+    initAudio();
 }
 
 // Enables/disables button debounce. If useDebounce = true, button must be released for frames before it can be re-triggered (usually ABC, or D-pad during menus)
@@ -1009,7 +1015,7 @@ uint8_t fineYsubCount = 0;
 uint8_t fineYpointer; // = winYfine;
 uint8_t coarseY;      // = winY;
 uint16_t *sp;         // = &spriteBuffer[0];
-uint8_t *pp;           // = &playfield[0];
+uint8_t *pp;          // = &playfield[0];
 
 uint8_t renderRow = 0;
 
@@ -1206,14 +1212,59 @@ void LCDsetDrawFlag()
 // Plays a 11025Hz 8-bit mono WAVE file from file system using the PWM function and DMA on GPIO14 (gamebadge channel 4)
 void playAudio(const char *path, int newPriority)
 {
+
+    if (audioPlaying == true)
+    { // Only one sound at a time
+        if (newPriority >= currentAudioPriority)
+        {
+            stopAudio();
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    result = ma_sound_init_from_file(&engine, path, 0, NULL, NULL, &sound);
+    if (result != MA_SUCCESS)
+    {
+        printf("Failed to load sound file. %s\n", path);
+        audioPlaying = false;
+        return;
+    }
+    audioPlaying = true;
+    ma_sound_start(&sound);
 }
 
 void stopAudio()
 {
+    if (audioPlaying == false)
+    {
+        return;
+    }
+    ma_sound_stop(&sound);
+    ma_sound_uninit(&sound);
+    audioPlaying = false;
 }
 
 void serviceAudio()
 { // This is called every game frame to see if PCM audio buffers need re-loading
+    if (audioPlaying)
+    {
+        if (ma_sound_at_end(&sound) != 0)
+        {
+            stopAudio();
+        }
+    }
+}
+
+void initAudio()
+{
+    result = ma_engine_init(NULL, &engine);
+    if (result != MA_SUCCESS)
+    {
+        printf("Failed to initialize audio engine.");
+    }
 }
 
 bool fillAudioBuffer(int whichOne)

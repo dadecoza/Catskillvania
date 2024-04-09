@@ -449,6 +449,7 @@ void setup()
     {
         go_init(i);
     }
+    initGfx();
 }
 
 void setup1()
@@ -459,6 +460,7 @@ void loop()
 {                    //-----------------------Core 0 handles the main logic loop
     gameLoopLogic(); // Check this every loop frame
     serviceDebounce();
+    serviceAudio();
 }
 
 void loop1()
@@ -500,7 +502,7 @@ void gameLoopLogic()
 
     case 1:
         // gpio_put(15, 1);
-        serviceAudio(); // Service PCM audio file streaming while Core1 draws the screens (gives Core0 something to do while we wait for vid mem access)
+        //serviceAudio(); // Service PCM audio file streaming while Core1 draws the screens (gives Core0 something to do while we wait for vid mem access)
         gameLoopState = 2;
         // gpio_put(15, 0);
         break;

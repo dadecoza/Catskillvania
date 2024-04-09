@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include <stdint.h>
 
 guchar playfield[ROWS * COLS * BYTES_PER_PIXEL];
 
@@ -16,8 +16,8 @@ bool fileActive = false; // True =  a file is open (reading level, playing audio
 
 static uint16_t linebuffer[2][3840]; // Sets up 2 buffers of 120 longs x 16 lines high
                                      //--------Y---X--- We put the X value second so we can use a pointer to rake the data
-static uint16_t nameTable[32][32];  // 4 screens of tile data. Can scroll around it NES-style (LCD is 15x15, tile is 16X16, slightly larger) X is 8 bytes wider to hold the palette reference (similar to NES but with 1 cell granularity)
-static uint16_t patternTable[8192]; // 256 char patterns X 8 lines each, 16 bits per line. Same size as NES but chunky pixel, not bitplane and stored in shorts
+static uint16_t nameTable[32][32];   // 4 screens of tile data. Can scroll around it NES-style (LCD is 15x15, tile is 16X16, slightly larger) X is 8 bytes wider to hold the palette reference (similar to NES but with 1 cell granularity)
+static uint16_t patternTable[8192];  // 256 char patterns X 8 lines each, 16 bits per line. Same size as NES but chunky pixel, not bitplane and stored in shorts
 static uint16_t spriteBuffer[14400];
 uint16_t paletteRGB[64];         // Stores the 32 colors as RGB values, pulled from nesPaletteRGBtable (with space for 32 extra)
 uint16_t nesPaletteRGBtable[64]; // Stores the current NES palette in 16 bit RGB format
@@ -65,8 +65,8 @@ int indexToGPIO[9] = {7, 11, 9, 13, 21, 5, 4, 3, 2}; // Button index is UDLR SEL
 
 volatile uint8_t buttonValue = 0;
 bool debounce[10] = {false, false, false, false, true, true, true, true, true, true}; // Index of which buttons have debounce (button must open before it can re-trigger)
-uint8_t debounceStart[10] = {0, 0, 0, 0, 5, 5, 1, 1, 1, 0};                        // If debounce, how many frames must button be open before it can re-trigger.
-uint8_t debounceTimer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};                        // The debounceStart time is copied here, and debounceTimer is what's decrimented
+uint8_t debounceStart[10] = {0, 0, 0, 0, 5, 5, 1, 1, 1, 0};                           // If debounce, how many frames must button be open before it can re-trigger.
+uint8_t debounceTimer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};                           // The debounceStart time is copied here, and debounceTimer is what's decrimented
 
 // Used to pre-store GPIO-to-channel numbers for PWM (5th channel reserved for PCM audio wave files)
 uint8_t slice_numbers[4];
@@ -112,7 +112,7 @@ void setButton(uint8_t b)
 // Returns a boolean of the button state, using debounce settings
 bool button(uint8_t which)
 { // A, B, C, select, start, up, down, left, right
-    //printf("Which: %d, buttonValue: %d\n", which, buttonValue);
+    // printf("Which: %d, buttonValue: %d\n", which, buttonValue);
     if (debounce[which] == 1)
     { // Switch has debounce?
         if (debounceTimer[which] == 0)
@@ -120,7 +120,7 @@ bool button(uint8_t which)
             if (buttonValue == which)
             {                                                // OK now you can check for a new button press
                 debounceTimer[which] = debounceStart[which]; // Yes? Set new timer
-                return true;                                    // and return button pressed
+                return true;                                 // and return button pressed
             }
         }
     }
@@ -155,7 +155,9 @@ void setButtonDebounce(int which, bool useDebounce, uint8_t frames)
     if (useDebounce == true && frames < 1)
     { // If debounce you must have at minimum 1 frame of debounce time (at least one frame off before can retrigger)
         frames = 1;
-    } else {
+    }
+    else
+    {
         frames = frames * 4;
     }
 
@@ -438,7 +440,8 @@ void drawText(const char *text, uint8_t x, uint8_t y, bool doWrap)
                         { // Move text past the space and keep going until we find a non-space
                             *text++;
                         }
-                        */ // Compiler is complaining
+                        */
+                        // Compiler is complaining
                         if (*text == 0)
                         {           // Ok we're past all the damn spaces. Did we hit end of string because some asshole typed "hello world!   " ?
                             return; // Fuck it we're done!
@@ -1197,24 +1200,20 @@ void LCDsetDrawFlag()
 // Plays a 11025Hz 8-bit mono WAVE file from file system using the PWM function and DMA on GPIO14 (gamebadge channel 4)
 void playAudio(const char *path, int newPriority)
 {
-
 }
 
 void stopAudio()
 {
-
 }
 
 void serviceAudio()
 { // This is called every game frame to see if PCM audio buffers need re-loading
-
 }
 
 bool fillAudioBuffer(int whichOne)
 {
-   return true;
+    return true;
 }
-
 
 // File system stuff-----------for loading/saving levels etc--------------------------------
 bool checkFile(const char *path)
@@ -1249,7 +1248,6 @@ bool loadFile(const char *path)
 
 void writeByte(uint8_t theByte)
 { // Writes a byte to current file
-
 }
 
 void writeBool(bool state)
@@ -1274,22 +1272,22 @@ uint8_t readByte()
 
 bool readBool()
 {
-    if (readByte() == 1) {
-		return true;
-	}
-	
-	return false;
+    if (readByte() == 1)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 void closeFile()
 { // Closes the active file
     fclose(file);
-	fileActive = false;
+    fileActive = false;
 }
 
 void eraseFile(const char *path)
 {
-
 }
 
 int rnd(int min, int max)

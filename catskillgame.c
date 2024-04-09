@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
 
 // Game object here
 typedef struct
@@ -6894,7 +6895,7 @@ void go_scan(int index, uint16_t worldX, uint16_t worldY)
         { // Evil robuts
 
             if (object[index].state == 200)
-            {                    // State 200 = stunned
+            {                                  // State 200 = stunned
                 offsetX = object[index].width; // Use facing forward robot
 
                 int shake = 1; // Default = very little shake (almost recovered)
@@ -7012,8 +7013,8 @@ void go_scan(int index, uint16_t worldX, uint16_t worldY)
 
             if (object[index].state == 200)
             {
-                drawSpriteRange(object[index].xPos - worldX, object[index].yPos - worldY, 12, 48 + 5, 1, 3, object[index].palette, true, false);     // Kitten first
-                drawSpriteRange(object[index].xPos - worldX - 4, object[index].yPos - worldY - 20, 13, 48 + 5, 2, 4, 3, false, false); // balloon second
+                drawSpriteRange(object[index].xPos - worldX, object[index].yPos - worldY, 12, 48 + 5, 1, 3, object[index].palette, true, false); // Kitten first
+                drawSpriteRange(object[index].xPos - worldX - 4, object[index].yPos - worldY - 20, 13, 48 + 5, 2, 4, 3, false, false);           // balloon second
                 object[index].yPos -= object[index].animate;
                 if (object[index].yPos < -30)
                 {
@@ -7096,11 +7097,11 @@ void go_scan(int index, uint16_t worldX, uint16_t worldY)
     if (object[index].category == 10 && object[index].type == 6)
     { // Breaking glass shards
 
-        //bool flipIt = true;
+        // bool flipIt = true;
 
         if ((object[index].subAnimate & 0x02) == 0x02)
         { // Mirror on the 2's
-            //flipIt = false;
+          // flipIt = false;
         }
 
         if ((++object[index].subAnimate & 0x01) == 0x01)
@@ -7117,7 +7118,7 @@ void go_scan(int index, uint16_t worldX, uint16_t worldY)
             object[index].yPos += 4;
             if (object[index].yPos > (119 - (object[index].height << 3)))
             {
-                object[index].yPos = 104;                // On floor
+                object[index].yPos = 104;             // On floor
                 object[index].sheetX = 8 + rnd(0, 5); // Turn object to rubble
                 object[index].sheetY = 32 + 15;
                 object[index].height = 1; // Same width, height of 1 tile
@@ -7159,7 +7160,7 @@ void go_scan(int index, uint16_t worldX, uint16_t worldY)
 
             if (++object[index].animate == 5)
             {
-               object[index].active = 0;
+                object[index].active = 0;
             }
         }
     }

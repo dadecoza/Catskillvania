@@ -4,6 +4,7 @@
 
 #include <gtk/gtk.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #define ROWS 240
 #define COLS 240

@@ -13,7 +13,7 @@
 extern uint8_t playfield[ROWS * COLS * BYTES_PER_PIXEL];
 
 void initGfx();
-void setButton(uint8_t button);
+void setButton(uint8_t, bool);
 void setButtonDebounce(int which, bool useDebounce, uint8_t frames);
 
 bool button(uint8_t which);

@@ -64,6 +64,7 @@ const int notes[] = {
 int indexToGPIO[9] = {7, 11, 9, 13, 21, 5, 4, 3, 2}; // Button index is UDLR SEL STR A B C  this maps that to the matching GPIO
 
 volatile uint8_t buttonValue = 0;
+bool buttonDown[10] = {false};
 bool debounce[10] = {false, false, false, false, true, true, true, true, true, true}; // Index of which buttons have debounce (button must open before it can re-trigger)
 uint8_t debounceStart[10] = {0, 0, 0, 0, 5, 5, 1, 1, 1, 0};                           // If debounce, how many frames must button be open before it can re-trigger.
 uint8_t debounceTimer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};                           // The debounceStart time is copied here, and debounceTimer is what's decrimented
@@ -72,7 +73,7 @@ uint8_t debounceTimer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};                     
 uint8_t slice_numbers[4];
 uint8_t chan_nummbers[4];
 
-void setButton(uint8_t b)
+void setButton(uint8_t b, bool down)
 {
     switch (b)
     {
@@ -107,6 +108,11 @@ void setButton(uint8_t b)
     default:
         buttonValue = no_but;
     }
+    buttonDown[buttonValue] = down;
+    if (!down) {
+        buttonValue = no_but;
+    }
+    
 }
 
 // Returns a boolean of the button state, using debounce settings
@@ -117,7 +123,7 @@ bool button(uint8_t which)
     { // Switch has debounce?
         if (debounceTimer[which] == 0)
         { // Has timer cleared?
-            if (buttonValue == which)
+            if (buttonDown[which])
             {                                                // OK now you can check for a new button press
                 debounceTimer[which] = debounceStart[which]; // Yes? Set new timer
                 return true;                                 // and return button pressed
@@ -126,7 +132,7 @@ bool button(uint8_t which)
     }
     else
     {
-        if (buttonValue == which)
+        if (buttonDown[which])
         { // Button pressed? That's all we care about
             return true;
         }
@@ -174,7 +180,7 @@ void serviceDebounce()
         { // Button uses debounce?
             if (debounceTimer[x] > 0)
             { // Is the value above 0? That means button was pressed in the past
-                if (buttonValue != no_but)
+                if (!buttonDown[x])
                 {                       // Has button opened?
                     debounceTimer[x]--; // If so, decrement debounce while it's open. When debounce reaches 0, it can be re-triggered under button funtion
                 }

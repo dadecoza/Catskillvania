@@ -4237,6 +4237,7 @@ void budLogic2()
             case damaged:
             case dead:
             case starting:
+                break;
             }
             budNoMove = false;
         }

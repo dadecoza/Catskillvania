@@ -5572,10 +5572,12 @@ void loadLevel()
         redrawEditWindow();
     }
 
-    for (int x = 0; x < mapWidth; x++)
+    // Caused segvault on 32bit linux
+    /*for (int x = 0; x < mapWidth; x++)
     {
         condoMap[15][x] = condoMap[14][x]; // Dupe the bottom row into +1 past bottom of tile map so shake doesn't show black
     }
+    */
 
     if (gameState == levelEdit)
     {                            // If editing, make sure the door has right # on it

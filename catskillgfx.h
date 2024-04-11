@@ -106,6 +106,7 @@ int rnd(int min, int max);
 #define A_but 6
 #define B_but 7
 #define C_but 8
-#define no_but 9
+#define ESC_but 9
+#define no_but 10
 
 #endif

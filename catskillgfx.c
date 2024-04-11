@@ -68,11 +68,11 @@ const int notes[] = {
 
 int indexToGPIO[9] = {7, 11, 9, 13, 21, 5, 4, 3, 2}; // Button index is UDLR SEL STR A B C  this maps that to the matching GPIO
 
-volatile uint8_t buttonValue = 0;
-bool buttonDown[10] = {false};
-bool debounce[10] = {false, false, false, false, true, true, true, true, true, true}; // Index of which buttons have debounce (button must open before it can re-trigger)
-uint8_t debounceStart[10] = {0, 0, 0, 0, 5, 5, 1, 1, 1, 0};                           // If debounce, how many frames must button be open before it can re-trigger.
-uint8_t debounceTimer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};                           // The debounceStart time is copied here, and debounceTimer is what's decrimented
+volatile uint8_t buttonValue = no_but;
+bool buttonDown[11] = {false};
+bool debounce[11] = {false, false, false, false, true, true, true, true, true, true, true}; // Index of which buttons have debounce (button must open before it can re-trigger)
+uint8_t debounceStart[11] = {0, 0, 0, 0, 5, 5, 1, 1, 1, 1, 1};                           // If debounce, how many frames must button be open before it can re-trigger.
+uint8_t debounceTimer[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};                           // The debounceStart time is copied here, and debounceTimer is what's decrimented
 
 // Used to pre-store GPIO-to-channel numbers for PWM (5th channel reserved for PCM audio wave files)
 uint8_t slice_numbers[4];
@@ -109,6 +109,9 @@ void setButton(uint8_t b, bool down)
     case 227:
     case 228:
         buttonValue = B_but;
+        break;
+    case 27:
+        buttonValue = start_but;
         break;
     default:
         buttonValue = no_but;
@@ -180,7 +183,7 @@ void setButtonDebounce(int which, bool useDebounce, uint8_t frames)
 // Must be called once per frame to service the button debounce
 void serviceDebounce()
 { // Must be called every frame, even if paused (because the buttons need to work to unpause!)
-    for (int x = 0; x < 9; x++)
+    for (int x = 0; x < 11; x++)
     { // Scan all buttons
         if (debounce[x] == 1)
         { // Button uses debounce?
@@ -1285,26 +1288,25 @@ bool checkFile(const char *path)
 
 void saveFile(const char *path)
 { // Opens a file for saving. Deletes the file if it already exists (write-over)
-
+    file = fopen(path, "wb");
     fileActive = true;
 }
 
 bool loadFile(const char *path)
 { // Opens a file for loading
-
-    fileActive = true;
     file = fopen(path, "rb");
     if (!file)
     {
-        printf("Unable to open palette file!\n");
+        printf("Unable to open %s!\n", path);
         return false;
     }
-
+    fileActive = true;
     return true;
 }
 
 void writeByte(uint8_t theByte)
 { // Writes a byte to current file
+    fwrite(&theByte, sizeof(uint8_t), 1, file);
 }
 
 void writeBool(bool state)
@@ -1345,6 +1347,12 @@ void closeFile()
 
 void eraseFile(const char *path)
 {
+    if (fileActive) {
+        closeFile();
+    }
+    if (remove(path) != 0) {
+        printf("Unable to delete %s!", path);
+    }
 }
 
 int rnd(int min, int max)

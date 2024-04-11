@@ -9,11 +9,6 @@ GdkPixbuf *pbs;
 gboolean keypress_function(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
     uint8_t k = event->keyval;
-    if (k == 27)
-    {
-        gtk_main_quit();
-        return TRUE;
-    }
     setButton(k, true);
     return TRUE;
 }

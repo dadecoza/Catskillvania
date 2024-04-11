@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <gtk/gtk.h>
 
 // Game object here
 typedef struct
@@ -461,6 +462,18 @@ void loop()
     gameLoopLogic(); // Check this every loop frame
     serviceDebounce();
     serviceAudio();
+    if (displayPauseState == true)
+    { // If paused for USB xfer, push START to unpause
+        if (button(start_but)) {        //Button pressed?
+			displayPause(false);
+			if (gameState == pauseMode) {			//USB menu pause? Go back to main menu (else game will resume I think?)		  
+				switchGameTo(titleScreen);
+			}
+			else {
+				//music.PauseTrack(currentFloor);		//Probably needs to be current MUSIC?
+			}
+		}
+    }
 }
 
 void loop1()
@@ -502,7 +515,7 @@ void gameLoopLogic()
 
     case 1:
         // gpio_put(15, 1);
-        //serviceAudio(); // Service PCM audio file streaming while Core1 draws the screens (gives Core0 something to do while we wait for vid mem access)
+        // serviceAudio(); // Service PCM audio file streaming while Core1 draws the screens (gives Core0 something to do while we wait for vid mem access)
         gameLoopState = 2;
         // gpio_put(15, 0);
         break;
@@ -635,7 +648,6 @@ void gameFrame()
                     currentFloor = 1;
                 }
             }
-
             tileDirect(12, 9, (((currentFloor - 1) * 16) + 128) + 15);
         }
 
@@ -685,11 +697,15 @@ void gameFrame()
                 break;
 
             case 13:
-                switchGameTo(pauseMode);
+                //switchGameTo(pauseMode);
+                gtk_main_quit();
                 break;
             }
         }
-
+        if (button(start_but))
+        {
+            gtk_main_quit();
+        }
         // if (button(B_but) && cursorY == 11) {		//DEV MODE - DISABLE
         // menuTimer = 0;
         // editType = false;					//Press B to edit hallway
@@ -937,7 +953,7 @@ void drawTitleScreen()
     drawText("start", 10, 10, false);
     drawText("load", 10, 11, false);
     drawText("edit", 10, 12, false);
-    drawText("usb", 10, 13, false);
+    drawText("exit", 10, 13, false);
 
     setWindow(0, 0);
 
@@ -1221,7 +1237,7 @@ void saveLogic()
 void checkSaveSlots()
 {
 
-    if (loadFile("/saves/slot_1.sav"))
+    if (checkFile("saves/slot_1.sav"))
     {
         saveSlots[0] = 1;
     }
@@ -1229,8 +1245,7 @@ void checkSaveSlots()
     {
         saveSlots[0] = 0;
     }
-    closeFile();
-    if (loadFile("/saves/slot_2.sav"))
+    if (checkFile("saves/slot_2.sav"))
     {
         saveSlots[1] = 1;
     }
@@ -1238,8 +1253,7 @@ void checkSaveSlots()
     {
         saveSlots[1] = 0;
     }
-    closeFile();
-    if (loadFile("/saves/slot_3.sav"))
+    if (checkFile("saves/slot_3.sav"))
     {
         saveSlots[2] = 1;
     }
@@ -1247,7 +1261,6 @@ void checkSaveSlots()
     {
         saveSlots[2] = 0;
     }
-    closeFile();
 }
 
 void eraseSaveSlots(int which)
@@ -1257,13 +1270,13 @@ void eraseSaveSlots(int which)
     {
 
     case 0:
-        eraseFile("/saves/slot_1.sav");
+        eraseFile("saves/slot_1.sav");
         break;
     case 1:
-        eraseFile("/saves/slot_2.sav");
+        eraseFile("saves/slot_2.sav");
         break;
     case 2:
-        eraseFile("/saves/slot_3.sav");
+        eraseFile("saves/slot_3.sav");
         break;
     }
 }

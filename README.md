@@ -20,6 +20,11 @@ sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev
 pacman -S base-devel mingw-w64-i686-toolchain mingw-w64-i686-gtk3 
 ```
 
+## macOS
+```
+brew install llvm gtk+3
+```
+
 # Installation
 Once the dependencies are installed ...
 ```

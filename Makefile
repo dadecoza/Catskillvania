@@ -14,13 +14,13 @@ catskill: main.o catskillgfx.o catskillgame.o
 	$(CC) main.o catskillgfx.o catskillgame.o $(CFLAGS) $(LDFLAGS) -o catskill
 
 main.o: main.c catskillgfx.o catskillgame.o
-	$(CC) -c $(CFLAGS) $(LDFLAGS) main.c
+	$(CC) -c $(CFLAGS) main.c
 
 catskillgfx.o: catskillgfx.c
-	$(CC) -c $(CFLAGS) $(LDFLAGS) catskillgfx.c
+	$(CC) -c $(CFLAGS) catskillgfx.c
 
 catskillgame.o: catskillgame.c
-	$(CC) -c $(CFLAGS) $(LDFLAGS) catskillgame.c
+	$(CC) -c $(CFLAGS) catskillgame.c
 
 clean:
 	rm -f main.o catskillgfx.o catskillgame.o catskill catskill.exe

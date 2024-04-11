@@ -1,4 +1,4 @@
-CFLAGS = -Wall -g `pkg-config --cflags gtk+-3.0` -lm -lpthread
+CFLAGS = -Wall -g -std=c99 `pkg-config --cflags gtk+-3.0` -lpthread -lm 
 LDFLAGS = `pkg-config --libs gtk+-3.0`
 
 
@@ -8,10 +8,19 @@ else
     CFLAGS += -ldl
 endif
 
-all: main.c catskillgfx.c catskillgame.c
-	$(CC) -o catskill main.c catskillgfx.c catskillgame.c miniaudio.h $(CFLAGS) $(LDFLAGS)
+all: catskill 
+
+catskill: main.o catskillgfx.o catskillgame.o
+	$(CC) main.o catskillgfx.o catskillgame.o $(CFLAGS) $(LDFLAGS) -o catskill
+
+main.o: main.c catskillgfx.o catskillgame.o
+	$(CC) -c $(CFLAGS) $(LDFLAGS) main.c
+
+catskillgfx.o: catskillgfx.c
+	$(CC) -c $(CFLAGS) $(LDFLAGS) catskillgfx.c
+
+catskillgame.o: catskillgame.c
+	$(CC) -c $(CFLAGS) $(LDFLAGS) catskillgame.c
 
 clean:
-	rm -f *~
-	rm -f *.o
-	rm -f catskill
+	rm -f main.o catskillgfx.o catskillgame.o catskill catskill.exe

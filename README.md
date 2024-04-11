@@ -30,5 +30,5 @@ Once the dependencies are installed ...
 git clone https://github.com/dadecoza/Catskillvania.git
 cd Catskillvania
 make
-./catskillvania
+./catskill
 ```

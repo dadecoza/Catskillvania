@@ -1,4 +1,5 @@
 #include "catskillgame.h"
+#include "catskillmusic.h"
 #include "catskillgfx.h"
 #include <stdlib.h>
 #include <stdbool.h>
@@ -451,6 +452,7 @@ void setup()
         go_init(i);
     }
     initGfx();
+    musicInit();
 }
 
 void setup1()
@@ -462,17 +464,22 @@ void loop()
     gameLoopLogic(); // Check this every loop frame
     serviceDebounce();
     serviceAudio();
+    serviceMusic();
     if (displayPauseState == true)
     { // If paused for USB xfer, push START to unpause
-        if (button(start_but)) {        //Button pressed?
-			displayPause(false);
-			if (gameState == pauseMode) {			//USB menu pause? Go back to main menu (else game will resume I think?)		  
-				switchGameTo(titleScreen);
-			}
-			else {
-				//music.PauseTrack(currentFloor);		//Probably needs to be current MUSIC?
-			}
-		}
+        if (button(start_but))
+        { // Button pressed?
+            displayPause(false);
+            musicResume();
+            if (gameState == pauseMode)
+            { // USB menu pause? Go back to main menu (else game will resume I think?)
+                switchGameTo(titleScreen);
+            }
+            else
+            {
+                // music.PauseTrack(currentFloor);		//Probably needs to be current MUSIC?
+            }
+        }
     }
 }
 
@@ -697,7 +704,7 @@ void gameFrame()
                 break;
 
             case 13:
-                //switchGameTo(pauseMode);
+                // switchGameTo(pauseMode);
                 gtk_main_quit();
                 break;
             }
@@ -877,6 +884,11 @@ void displayPause(bool state)
 {
 
     displayPauseState = state;
+    if (state) {
+        musicPause();
+    } else {
+        musicResume();
+    }
     pauseLCD(state);
 }
 
@@ -2197,6 +2209,7 @@ void setupHallway()
         budSpawnTimer = 0;
         budState = rest;
         spawnIntoHallway(0, 5, 40);
+        playTrack(1);
         break;
 
     case 11: // Spawn in front of elevator (if died in hallway)
@@ -6870,6 +6883,17 @@ void clearMessage()
     }
 
     redrawEditWindow();
+}
+
+// Music Stuff
+void playTrack(int track)
+{
+    musicStop();
+    switch (track) {
+        case 1:
+            musicPlay("music/CastlevaniaVampireKiller.nsf", 0);
+            break;
+    }
 }
 
 void go_setPos(int index, uint16_t atX, uint16_t atY)

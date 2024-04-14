@@ -51,7 +51,7 @@ void musicGetFrame()
         return;
     }
     ma_uint32 bytesPerFrame = ma_get_bytes_per_frame(MUSIC_FORMAT, MUSIC_CHANNELS);
-    frameCount = MUSIC_SAMPLES / 4; // frames requested
+    frameCount = 1024; // frames requested
     void *pWriteBuffer;
     music_result = ma_pcm_rb_acquire_write(&rb, &frameCount, &pWriteBuffer);
     if (music_result != MA_SUCCESS)
@@ -105,9 +105,9 @@ void musicPlayFrame()
 void musicAlign()
 {
     ma_int32 distance = ma_pcm_rb_pointer_distance(&rb);
-    if (!distance)
+    if (distance == 0)
     {
-        music_result = ma_pcm_rb_seek_write(&rb, MUSIC_SAMPLES / 4);
+        music_result = ma_pcm_rb_seek_write(&rb, MUSIC_SAMPLES/2);
         if (music_result != MA_SUCCESS)
         {
             printf("Failed to move write pointer forward\n");
@@ -181,4 +181,5 @@ void serviceMusic()
     {
         musicPlayFrame();
     }
+    musicAlign();
 }

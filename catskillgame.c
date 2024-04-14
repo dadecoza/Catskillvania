@@ -6898,37 +6898,37 @@ void playTrack(int track, bool doloop)
     switch (track)
     {
     case 0:
-        musicPlay("music/Catskillvania_intro.nsf", 0);
+        musicPlay("music/Castlevania1.nsfe", 10); // ??
         break;
     case 1:
-        musicPlay("music/Catskillvania_stage_1.nsf", 0);
+        musicPlay("music/Castlevania1.nsfe", 1);
         break;
     case 2:
-        musicPlay("music/Catskillvania_stage_2.nsf", 0);
+        musicPlay("music/Castlevania3.nsfe", 13);
         break;
     case 3:
-        musicPlay("music/Catskillvania_stage_3.nsf", 0);
+        musicPlay("music/Castlevania3.nsfe", 10);
         break;
     case 4:
-        musicPlay("music/Catskillvania_stage_4.nsf", 0);
+        musicPlay("music/Castlevania1.nsfe", 5);
         break;
     case 5:
-        musicPlay("music/Catskillvania_stage_5.nsf", 0);
+        musicPlay("music/Castlevania1.nsfe", 7);
         break;
     case 9:
-        musicPlay("music/Catskillvania_title_music.nsf", 0);
+        musicPlay("music/Castlevania1.nsfe", 0);
         break;
     case 10:
-        musicPlay("music/Catskillvania_save_load.nsf", 0);
+        musicPlay("music/Castlevania3.nsfe", 20);
         break;
     case 11:
-        musicPlay("music/Catskillvania_game_over.nsf", 0);
+        musicPlay("music/Castlevania3.nsfe", 27);
         break;
     case 12:
-        musicPlay("music/Catskillvania_selection.nsf", 0);
+        musicPlay("music/Castlevania3.nsfe", 5);
         break;
     case 13:
-        musicPlay("music/Catskillvania_end_music.nsf", 0);
+        musicPlay("music/Castlevania3.nsfe", 24);
         break;
     }
     currentTrack = track;

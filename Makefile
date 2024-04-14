@@ -3,7 +3,7 @@ LDFLAGS = `pkg-config --libs gtk+-3.0`
 
 
 ifeq ($(OS),Windows_NT)
-    CFLAGS += -mwindows
+    #CFLAGS += -mwindows
 else
     CFLAGS += -ldl
 endif

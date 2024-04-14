@@ -1,5 +1,6 @@
 catskill
 catskill.exe
 release
+.vscode
 *.o
 

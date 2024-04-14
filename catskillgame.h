@@ -122,5 +122,5 @@ void go_scan(int index,uint16_t worldX, uint16_t worldY);
 bool go_hitBox(int index,int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 bool go_hitBoxSmall(int index,int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 void go_init(int index);
-void playTrack(int);
+void playTrack(int, bool);
 #endif

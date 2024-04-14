@@ -8,14 +8,14 @@ GdkPixbuf *pbs;
 
 gboolean keypress_function(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-    uint8_t k = event->keyval;
+    uint16_t k = event->keyval;
     setButton(k, true);
     return TRUE;
 }
 
 gboolean keyrelease_function(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-    uint8_t k = event->keyval;
+    uint16_t k = event->keyval;
     setButton(k, false);
     return TRUE;
 }

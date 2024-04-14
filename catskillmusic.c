@@ -11,6 +11,7 @@ ma_pcm_rb rb;
 ma_sound music;
 Music_Emu *emu;
 ma_uint32 frameCount;
+int music_track = 0;
 enum MusicState
 {
     musicNotReady,
@@ -101,7 +102,7 @@ void musicPlayFrame()
     }
 }
 
-void musicResetFrame()
+void musicAlign()
 {
     ma_int32 distance = ma_pcm_rb_pointer_distance(&rb);
     if (!distance)
@@ -118,38 +119,48 @@ void musicResetFrame()
 void musicStop()
 {
     musicState = musicReady;
+    musicAlign();
 }
 
 void musicPause()
 {
-    if (musicState != musicPlaying)
+    if (musicState == musicPlaying)
     {
-        return;
+        musicState = musicPaused;
     }
-    musicState = musicPaused;
+    else if (musicState == musicPaused)
+    {
+        musicResume();
+    }
 }
 
 void musicResume()
 {
-    if (musicState != musicPaused)
+    if (musicState != musicNotReady)
     {
-        return;
+        musicAlign();
+        musicState = musicPlaying;
     }
-    musicResetFrame();
-    musicState = musicPlaying;
 }
 
 void musicPlay(const char *path, int track)
 {
-    if (musicState != musicReady)
+    if (musicState == musicNotReady)
     {
         return;
     }
+    music_track = track;
     gme_open_file(path, &emu, MUSIC_SAMPLERATE);
     gme_start_track(emu, track);
     musicState = musicPlaying;
+    musicAlign();
     musicGetFrame();
     musicPlayFrame();
+}
+
+int musicTrack()
+{
+    return music_track;
 }
 
 void serviceMusic()

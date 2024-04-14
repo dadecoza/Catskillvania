@@ -192,7 +192,6 @@ enum stateMachineGame
     theEnd
 }; // State machine of the game (under stateMachine = game)
 enum stateMachineGame gameState = bootingMenu;
-
 enum stateMachineEdit
 {
     tileDrop,
@@ -403,6 +402,8 @@ int bestTime[6][2] = {{3, 30}, {3, 40}, {4, 15}, {4, 15}, {4, 20}, {4, 30}};
 int floorSeconds; // Turn dumb minutes/seconds into seconds
 int timeBonus;    // Pre-calc bonus for time (thanks CHAT-GPT, our new overlord masters)
 
+int currentTrack = 0;
+
 void gameLoop()
 {
     loop();
@@ -470,14 +471,13 @@ void loop()
         if (button(start_but))
         { // Button pressed?
             displayPause(false);
-            musicResume();
             if (gameState == pauseMode)
             { // USB menu pause? Go back to main menu (else game will resume I think?)
                 switchGameTo(titleScreen);
             }
             else
             {
-                // music.PauseTrack(currentFloor);		//Probably needs to be current MUSIC?
+                musicPause(); // Probably needs to be current MUSIC?
             }
         }
     }
@@ -663,7 +663,7 @@ void gameFrame()
             if (cursorY > 10)
             {
                 cursorY--;
-                ////music.PlayTrack(15);
+                playTrack(15, false);
                 // pwm_set_freq_duty(6, 493, 25);
                 soundTimer = 10;
             }
@@ -673,7 +673,7 @@ void gameFrame()
             if (cursorY < 13)
             {
                 cursorY++;
-                ////music.PlayTrack(15);
+                playTrack(15, false);
                 // pwm_set_freq_duty(6, 520, 25);
                 soundTimer = 10;
             }
@@ -686,7 +686,7 @@ void gameFrame()
         if (button(A_but))
         {
             menuTimer = 0;
-            // music.StopTrack(9); // In case title music is playing
+            musicStop(); // In case title music is playing
             switch (cursorY)
             {
             case 10:
@@ -865,8 +865,10 @@ void gameFrame()
             { // Only times you can PAWS get it?
                 displayPause(true);
                 playAudio("audio/pause_K.wav", 100);
-                // music.PauseTrack(currentFloor); // Probably needs to be current MUSIC?
+                musicPause(); // Probably needs to be current MUSIC?
             }
+        } else if (button(ESC_but)) {
+            switchGameTo(titleScreen);   
         }
     }
     drawPlayfield();
@@ -884,11 +886,6 @@ void displayPause(bool state)
 {
 
     displayPauseState = state;
-    if (state) {
-        musicPause();
-    } else {
-        musicResume();
-    }
     pauseLCD(state);
 }
 
@@ -989,7 +986,7 @@ void drawTitleScreen()
     isDrawn = true;
     displayPause(false);
 
-    // music.PlayTrack(9, false);
+    playTrack(9, false);
 }
 
 void drawPauseMenu()
@@ -1051,8 +1048,8 @@ void setupLoad()
         }
     }
 
-    drawText("A = LOAD", 3, 12, false);
-    drawText("B = MENU", 3, 13, false);
+    drawText("Z = LOAD", 3, 12, false);
+    drawText("X = MENU", 3, 13, false);
     drawText("C = ERASE", 3, 14, false);
 
     cursorY = 7;
@@ -1064,7 +1061,7 @@ void setupLoad()
     displayPause(false); // Allow core 2 to draw
     isDrawn = true;
 
-    // music.PlayTrack(10, true);
+    playTrack(10, true);
 }
 
 void loadLogic()
@@ -1089,7 +1086,7 @@ void loadLogic()
         if (cursorY > 7)
         {
             cursorY--;
-            ////music.PlayTrack(15);
+            playTrack(15, false);
             // pwm_set_freq_duty(6, 493, 25);
             soundTimer = 10;
         }
@@ -1099,7 +1096,7 @@ void loadLogic()
         if (cursorY < 9)
         {
             cursorY++;
-            ////music.PlayTrack(15);
+            playTrack(15, false);
             // pwm_set_freq_duty(6, 520, 25);
             soundTimer = 10;
         }
@@ -1109,7 +1106,7 @@ void loadLogic()
     {
         if (saveSlots[cursorY - 7] == 1)
         {
-            // music.StopTrack(10);
+            musicStop();
             menuTimer = 0;
             loadGameFile(cursorY - 7);
             loadFlag = true; // When switch to game mode, this resumes instead of starts new
@@ -1119,7 +1116,7 @@ void loadLogic()
 
     if (button(B_but))
     {
-        // music.StopTrack(10);
+        musicStop();
         switchGameTo(titleScreen);
     }
 
@@ -1187,7 +1184,7 @@ void setupSave()
     displayPause(false); // Allow core 2 to draw
     isDrawn = true;
 
-    // music.PlayTrack(10, true);
+    playTrack(10, true);
 }
 
 void saveLogic()
@@ -1212,7 +1209,7 @@ void saveLogic()
         if (cursorY > 7)
         {
             cursorY--;
-            ////music.PlayTrack(15);
+            playTrack(15, false);
             // pwm_set_freq_duty(6, 493, 25);
             soundTimer = 10;
         }
@@ -1222,7 +1219,7 @@ void saveLogic()
         if (cursorY < 9)
         {
             cursorY++;
-            ////music.PlayTrack(15);
+            playTrack(15, false);
             // pwm_set_freq_duty(6, 520, 25);
             soundTimer = 10;
         }
@@ -1230,7 +1227,7 @@ void saveLogic()
 
     if (button(A_but))
     {
-        // music.StopTrack(10);
+        musicStop();
         menuTimer = 0;
         saveGameFile(cursorY - 7);
         switchGameTo(titleScreen);
@@ -1415,7 +1412,7 @@ void setupDiffSelect()
     menuTimer = 0;
     budY = 0;
 
-    // music.PlayTrack(12, true);
+    playTrack(12, true);
 }
 
 void diffSelectLogic()
@@ -1515,7 +1512,7 @@ void diffSelectLogic()
 
     if (button(A_but))
     {
-        // music.StopTrack(12);
+        musicStop();
         startNewGame();
     }
 }
@@ -1542,7 +1539,7 @@ void startNewGame()
 
     loadFlag = false; // NEW GAME
     whichScene = 0;
-    // music.PlayTrack(0, false);
+    playTrack(0, false);
     switchGameTo(story);
 }
 
@@ -1578,7 +1575,7 @@ void setupGameOver()
     displayPause(false); // Allow core 2 to draw
     isDrawn = true;
 
-    // music.PlayTrack(11, false);
+    playTrack(11, false);
 }
 
 void gameOverLogic()
@@ -1603,7 +1600,7 @@ void gameOverLogic()
         if (cursorY > 6)
         {
             cursorY--;
-            ////music.PlayTrack(15);
+            playTrack(15, false);
             // pwm_set_freq_duty(6, 493, 25);
             soundTimer = 10;
         }
@@ -1613,7 +1610,7 @@ void gameOverLogic()
         if (cursorY < 8)
         {
             cursorY++;
-            ////music.PlayTrack(15);
+            playTrack(15, false);
             // pwm_set_freq_duty(6, 520, 25);
             soundTimer = 10;
         }
@@ -1621,9 +1618,6 @@ void gameOverLogic()
 
     if (button(A_but))
     {
-
-        // music.StopTrack(11);
-
         menuTimer = 0;
         switch (cursorY)
         {
@@ -1777,7 +1771,7 @@ void startNewFloor()
 void setupJail()
 {
 
-    // music.StopTrack(currentFloor);
+    musicStop();
 
     fillTiles(0, 0, 31, 15, ' ', 0); // Black BG
 
@@ -1837,6 +1831,7 @@ void jailLogic()
                 budPower = powerMax;
                 jump = 0;
                 velocikitten = 0;
+                musicResume();
                 switch (lastMap)
                 {
 
@@ -2168,6 +2163,10 @@ void condoLogic()
     setWindow((xWindowCoarse << 3) | (xWindowFine + xShake), yPos + yShake); // Set scroll window
 
     objectLogic();
+
+    if (currentTrack != currentFloor) {
+        playTrack(currentFloor, true);
+    }
 }
 
 // Hallway-------------------------------------
@@ -2209,7 +2208,7 @@ void setupHallway()
         budSpawnTimer = 0;
         budState = rest;
         spawnIntoHallway(0, 5, 40);
-        playTrack(1);
+        playTrack(1, false);
         break;
 
     case 11: // Spawn in front of elevator (if died in hallway)
@@ -2442,6 +2441,10 @@ void hallwayLogic()
             waitPriorityChange = false; // Clear flag and...
             objectLogic();              // DEW IT
         }
+    }
+
+    if (currentTrack != currentFloor) {
+        playTrack(currentFloor, true);
     }
 }
 
@@ -2786,7 +2789,7 @@ void objectLogic()
 void setupElevator()
 {
 
-    // music.StopTrack(currentFloor); // End this floor's music (new floor = new music)
+    musicStop(); // End this floor's music (new floor = new music)
 
     stopAudio();
 
@@ -2869,7 +2872,7 @@ void elevatorLogic()
 
         if (++bonusTimer > 1)
         {
-            // music.PlayTrack(15);
+            playTrack(15, false);
             bonusTimer = 0;
             if (kittyBonus == kittenFloor)
             {
@@ -2904,7 +2907,7 @@ void elevatorLogic()
 
             if (++bonusTimer > 1)
             {
-                // music.PlayTrack(15);
+                playTrack(15, false);
                 bonusTimer = 0;
                 if (robotBonus == robotKillFloor)
                 {
@@ -2939,7 +2942,7 @@ void elevatorLogic()
 
             if (++bonusTimer > 1)
             {
-                // music.PlayTrack(15);
+                playTrack(15, false);
                 bonusTimer = 0;
                 if (propBonus == propDamageFloor)
                 {
@@ -3067,8 +3070,8 @@ void setupStory()
         worldX = 96;
         menuTimer = 65;
 
-        ////music.StopTrack(0);		//Kill intro track
-        ////music.PlayTrack(15);	//Interlude
+        // Kill intro track
+        playTrack(15, false); // Interlude
         break;
     }
 
@@ -3288,7 +3291,7 @@ void storyLogic()
 
         if (menuTimer == 0)
         {
-            // music.StopTrack(0); // Kill intro track
+            musicStop(); // Kill intro track
             switchGameTo(game);
         }
 
@@ -3297,7 +3300,7 @@ void storyLogic()
 
     if (button(A_but))
     {
-        // music.StopTrack(0); // Kill intro track
+        musicStop(); // Kill intro track
         switchGameTo(game);
     }
 }
@@ -3377,7 +3380,7 @@ void setupEnding()
     displayPause(false); // Allow core 2 to draw
     isDrawn = true;
 
-    // music.PlayTrack(13, true);
+    playTrack(13, true);
 }
 
 void endingLogic()
@@ -3513,7 +3516,7 @@ void endingLogic()
 
     if (button(A_but))
     {
-        // music.StopTrack(13);
+        musicStop();
         switchGameTo(gameOver);
     }
 }
@@ -3596,7 +3599,7 @@ void budDamage()
 
     if (budPower == 0)
     {
-        // music.StopTrack(currentFloor);
+        musicStop();
         budStunned = 10; // Prevent object re-triggers during death
         menuTimer = 30;  // One second
         playAudio("audio/buddead.wav", 100);
@@ -6886,14 +6889,49 @@ void clearMessage()
 }
 
 // Music Stuff
-void playTrack(int track)
+void playTrack(int track, bool doloop)
 {
-    musicStop();
-    switch (track) {
-        case 1:
-            musicPlay("music/CastlevaniaVampireKiller.nsf", 0);
-            break;
+    if (track == 15) {
+        playAudio("audio/ping.wav", 90);
+        return;
     }
+    switch (track)
+    {
+    case 0:
+        musicPlay("music/Catskillvania_intro.nsf", 0);
+        break;
+    case 1:
+        musicPlay("music/Catskillvania_stage_1.nsf", 0);
+        break;
+    case 2:
+        musicPlay("music/Catskillvania_stage_2.nsf", 0);
+        break;
+    case 3:
+        musicPlay("music/Catskillvania_stage_3.nsf", 0);
+        break;
+    case 4:
+        musicPlay("music/Catskillvania_stage_4.nsf", 0);
+        break;
+    case 5:
+        musicPlay("music/Catskillvania_stage_5.nsf", 0);
+        break;
+    case 9:
+        musicPlay("music/Catskillvania_title_music.nsf", 0);
+        break;
+    case 10:
+        musicPlay("music/Catskillvania_save_load.nsf", 0);
+        break;
+    case 11:
+        musicPlay("music/Catskillvania_game_over.nsf", 0);
+        break;
+    case 12:
+        musicPlay("music/Catskillvania_selection.nsf", 0);
+        break;
+    case 13:
+        musicPlay("music/Catskillvania_end_music.nsf", 0);
+        break;
+    }
+    currentTrack = track;
 }
 
 void go_setPos(int index, uint16_t atX, uint16_t atY)
@@ -7024,8 +7062,8 @@ void go_scan(int index, uint16_t worldX, uint16_t worldY)
 
                 if (object[index].dir == false)
                 {
-                    xPos += object[index].speedPixels;
-                    if (xPos > (object[index].xSentryRight - (object[index].width * 8)))
+                    object[index].xPos += object[index].speedPixels;
+                    if (object[index].xPos > (object[index].xSentryRight - (object[index].width * 8)))
                     { // Sub robot width from right edge, since we are checking left edge of robot xPos
                         object[index].dir = true;
                         object[index].turning = true;

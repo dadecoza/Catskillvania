@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "catskillmusic.h": "c",
+        "miniaudio.h": "c"
+    }
+}

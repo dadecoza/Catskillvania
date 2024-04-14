@@ -71,47 +71,55 @@ int indexToGPIO[9] = {7, 11, 9, 13, 21, 5, 4, 3, 2}; // Button index is UDLR SEL
 volatile uint8_t buttonValue = no_but;
 bool buttonDown[11] = {false};
 bool debounce[11] = {false, false, false, false, true, true, true, true, true, true, true}; // Index of which buttons have debounce (button must open before it can re-trigger)
-uint8_t debounceStart[11] = {0, 0, 0, 0, 5, 5, 1, 1, 1, 1, 1};                           // If debounce, how many frames must button be open before it can re-trigger.
-uint8_t debounceTimer[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};                           // The debounceStart time is copied here, and debounceTimer is what's decrimented
+uint8_t debounceStart[11] = {0, 0, 0, 0, 5, 5, 1, 1, 1, 1, 1};                              // If debounce, how many frames must button be open before it can re-trigger.
+uint8_t debounceTimer[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};                              // The debounceStart time is copied here, and debounceTimer is what's decrimented
 
 // Used to pre-store GPIO-to-channel numbers for PWM (5th channel reserved for PCM audio wave files)
 uint8_t slice_numbers[4];
 uint8_t chan_nummbers[4];
 
-void setButton(uint8_t b, bool down)
+void setButton(uint16_t b, bool down)
 {
     switch (b)
     {
     case 97:
-    case 81:
+    case 65361:
         buttonValue = left_but;
         break;
     case 119:
-    case 82:
+    case 65362:
         buttonValue = up_but;
         break;
     case 100:
-    case 83:
+    case 65363:
         buttonValue = right_but;
         break;
     case 115:
-    case 84:
+    case 65364:
         buttonValue = down_but;
         break;
-    case 131:
-    case 13:
-    case 233:
+    case 65293:
+    case 'z':
+    case 'Z':
         buttonValue = A_but;
         break;
     case 32:
+    case 'c':
+    case 'C':
         buttonValue = C_but;
         break;
-    case 227:
-    case 228:
+    case 65507:
+    case 65508:
+    case 'x':
+    case 'X':
         buttonValue = B_but;
         break;
-    case 27:
+    case 65307:
         buttonValue = start_but;
+        break;
+    case 'q':
+    case 'Q':
+        buttonValue = ESC_but;
         break;
     default:
         buttonValue = no_but;
@@ -1347,10 +1355,12 @@ void closeFile()
 
 void eraseFile(const char *path)
 {
-    if (fileActive) {
+    if (fileActive)
+    {
         closeFile();
     }
-    if (remove(path) != 0) {
+    if (remove(path) != 0)
+    {
         printf("Unable to delete %s!", path);
     }
 }

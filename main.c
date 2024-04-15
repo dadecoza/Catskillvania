@@ -137,7 +137,6 @@ thread_draw(void *ptr)
 {
     int msec = 0;
     clock_t before = clock();
-    int frameTime = 0;
     while (1)
     {
         if (surface == (cairo_surface_t *)NULL)
@@ -147,7 +146,7 @@ thread_draw(void *ptr)
 
         clock_t difference = clock() - before;
         msec = difference * 1000 / CLOCKS_PER_SEC;
-        if (msec < LOOP_DELAY_IN_MS-(frameTime*2))
+        if (msec < LOOP_DELAY_IN_MS)
         {
             continue;
         }
@@ -186,12 +185,6 @@ thread_draw(void *ptr)
         // cairo_surface_mark_dirty(surface);
 
         gameLoop();
-
-        if (frameTime == 0) {
-            clock_t difference = clock() - before;
-            frameTime = difference * 1000 / CLOCKS_PER_SEC;
-            printf("%d\n", frameTime);
-        }
 
         // end draw
 

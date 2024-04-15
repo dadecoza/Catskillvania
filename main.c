@@ -7,7 +7,7 @@
 
 #define WIDTH 240
 #define HEIGHT 240
-#define LOOP_DELAY_IN_MS 14
+#define LOOP_DELAY_IN_MS 12
 
 /* Local variables. */
 static pthread_t drawing_thread;

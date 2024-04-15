@@ -5,8 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 
-
-// not really related to FPS the higher the number the faster the 
+// not really related to FPS the higher the number the faster the
 // framerate
 #define SPEED 180
 
@@ -25,7 +24,6 @@ static int surface_height;
 static gboolean drawing_area_configure_cb(GtkWidget *, GdkEventConfigure *);
 static void drawing_area_draw_cb(GtkWidget *, cairo_t *, void *);
 static void *thread_draw(void *);
-static int currently_drawing = 0;
 
 gboolean keypress_function(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
@@ -49,29 +47,19 @@ void close_game(GtkWidget *window, gpointer data)
 
 gboolean timer_exe(GtkWidget *window)
 {
-
     static gboolean first_execution = TRUE;
-    int drawing_status = g_atomic_int_get(&currently_drawing);
-    if (drawing_status == 0)
+    static pthread_t thread_info;
+    if (first_execution != TRUE)
     {
-        static pthread_t thread_info;
-        if (first_execution != TRUE)
-        {
-            pthread_join(thread_info, NULL);
-        }
-        pthread_create(&thread_info, NULL, thread_draw, NULL);
+        pthread_join(thread_info, NULL);
     }
-
-    // gdk_drawable_get_size(pixmap, &width, &height);
-    // gtk_widget_queue_draw_area(window, 0, 0, width, height);
+    pthread_create(&thread_info, NULL, thread_draw, NULL);
     first_execution = FALSE;
-
     if (GTK_IS_WIDGET(window))
     {
         gtk_widget_queue_draw(GTK_WIDGET(window));
         return TRUE;
     }
-
     return FALSE;
 }
 
@@ -156,7 +144,6 @@ drawing_area_draw_cb(GtkWidget *widget, cairo_t *context, void *ptr)
 static void *
 thread_draw(void *ptr)
 {
-    currently_drawing = 1;
     if (surface == (cairo_surface_t *)NULL)
     {
         return NULL;
@@ -202,7 +189,6 @@ thread_draw(void *ptr)
     cairo_destroy(context);
 
     pthread_mutex_unlock(&mutex);
-    currently_drawing = 0;
     return NULL;
 }
 /* EOF */

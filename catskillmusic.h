@@ -13,5 +13,4 @@ void musicResume();
 void musicPlay(const char *path, int track);
 int musicTrack();
 void serviceMusic();
-void musicAlign();
 #endif

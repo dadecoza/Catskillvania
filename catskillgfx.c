@@ -133,7 +133,9 @@ void setButton(uint16_t b, bool down)
 
 // Returns a boolean of the button state, using debounce settings
 bool button(uint8_t which)
-{ // A, B, C, select, start, up, down, left, right
+{
+
+    // A, B, C, select, start, up, down, left, right
     // printf("Which: %d, buttonValue: %d\n", which, buttonValue);
     if (debounce[which] == 1)
     { // Switch has debounce?
@@ -178,10 +180,6 @@ void setButtonDebounce(int which, bool useDebounce, uint8_t frames)
     if (useDebounce == true && frames < 1)
     { // If debounce you must have at minimum 1 frame of debounce time (at least one frame off before can retrigger)
         frames = 1;
-    }
-    else
-    {
-        frames = frames * 4;
     }
 
     debounceStart[which] = frames;
@@ -1075,7 +1073,7 @@ void drawPlayfield()
     {
         RenderRow();
         drawLineOfPlayfield(&linebuffer[whichBuffer][0], 3840);
-        
+
         if (++whichBuffer > 1)
         { // Switch up buffers, we will draw the next while the prev is being DMA'd to LCD
             whichBuffer = 0;
@@ -1349,7 +1347,8 @@ bool readBool()
 
 void closeFile()
 { // Closes the active file
-    if (!fileActive) {
+    if (!fileActive)
+    {
         return;
     }
     fclose(file);

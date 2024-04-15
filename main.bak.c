@@ -5,10 +5,6 @@
 #include <stdio.h>
 #include <time.h>
 
-// not really related to FPS the higher the number the faster the
-// framerate
-#define SPEED 120
-
 #define WIDTH 240
 #define HEIGHT 240
 #define LOOP_DELAY_IN_MS 12
@@ -19,9 +15,9 @@ static pthread_mutex_t mutex;
 static cairo_surface_t *surface = NULL;
 static int surface_width;
 static int surface_height;
-static int currently_drawing = 0;
 
 /* Local function prototypes. */
+static gboolean invalidate_cb(void *);
 static gboolean drawing_area_configure_cb(GtkWidget *, GdkEventConfigure *);
 static void drawing_area_draw_cb(GtkWidget *, cairo_t *, void *);
 static void *thread_draw(void *);
@@ -40,32 +36,9 @@ gboolean keyrelease_function(GtkWidget *widget, GdkEventKey *event, gpointer dat
     return TRUE;
 }
 
-void close_game(GtkWidget *window, gpointer data)
-{
-    quitGame();
-    gtk_main_quit();
-}
-
-gboolean timer_exe(GtkWidget *window)
-{
-    static gboolean first_execution = TRUE;
-    int drawing_status = g_atomic_int_get(&currently_drawing);
-    if (drawing_status == 0)
-    {
-        static pthread_t thread_info;
-        if (first_execution != TRUE)
-        {
-            pthread_join(thread_info, NULL);
-        }
-        pthread_create(&thread_info, NULL, thread_draw, NULL);
-    }
-
-    if (GTK_IS_WIDGET(window))
-    {
-        gtk_widget_queue_draw(GTK_WIDGET(window));
-    }
-    first_execution = FALSE;
-    return TRUE;
+void close_game(GtkWidget * window, gpointer data) {
+  quitGame();
+  gtk_main_quit(); 
 }
 
 int main(int argc, char **argv)
@@ -91,6 +64,9 @@ int main(int argc, char **argv)
     pthread_mutex_init(&mutex, NULL);
     pthread_create(&drawing_thread, NULL, thread_draw, NULL);
 
+    /* Create a  timer to invalidate our window at 60Hz, and display the stored surface. */
+    g_timeout_add(1000 / 60, invalidate_cb, drawing_area);
+
     /* Connect our redraw callback. */
     g_signal_connect(drawing_area, "draw", G_CALLBACK(drawing_area_draw_cb), NULL);
 
@@ -101,9 +77,19 @@ int main(int argc, char **argv)
     g_signal_connect(G_OBJECT(main_window), "key_press_event", G_CALLBACK(keypress_function), NULL);
     g_signal_connect(G_OBJECT(main_window), "key_release_event", G_CALLBACK(keyrelease_function), NULL);
 
-    g_timeout_add(1000 / SPEED, (GSourceFunc)timer_exe, drawing_area);
-
     gtk_main();
+}
+
+static gboolean
+invalidate_cb(void *ptr)
+{
+    if (GTK_IS_WIDGET(ptr))
+    {
+        gtk_widget_queue_draw(GTK_WIDGET(ptr));
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 static gboolean
@@ -149,50 +135,66 @@ drawing_area_draw_cb(GtkWidget *widget, cairo_t *context, void *ptr)
 static void *
 thread_draw(void *ptr)
 {
-    if (surface == (cairo_surface_t *)NULL)
+    int msec = 0;
+    clock_t before = clock();
+    while (1)
     {
-        return NULL;
-    }
-    currently_drawing = 1;
-    pthread_mutex_lock(&mutex);
-    cairo_t *context = cairo_create(surface);
-
-    /* Draw the background. */
-    cairo_set_source_rgb(context, 1, 1, 1);
-    cairo_rectangle(context, 0, 0, surface_width, surface_height);
-    cairo_fill(context);
-    cairo_set_source_rgb(context, 0.5, 0.5, 0);
-
-    unsigned char *current_row;
-    current_row = cairo_image_surface_get_data(surface);
-    int stride = cairo_image_surface_get_stride(surface);
-    uint8_t *pf;
-    pf = &playfield[0];
-    for (int y = 0; y < HEIGHT; y++)
-    {
-        uint32_t *row = (void *)current_row;
-        for (int x = 0; x < WIDTH; x++)
+        if (surface == (cairo_surface_t *)NULL)
         {
-            uint32_t r = *pf++;
-            uint32_t g = *pf++;
-            uint32_t b = *pf++;
-            row[x] = (r << 16) | (g << 8) | b;
+            continue;
         }
 
-        current_row += stride;
+        clock_t difference = clock() - before;
+        msec = difference * 1000 / CLOCKS_PER_SEC;
+        if (msec < LOOP_DELAY_IN_MS)
+        {
+            continue;
+        }
+        before = clock();
+
+        pthread_mutex_lock(&mutex);
+
+        cairo_t *context = cairo_create(surface);
+
+        /* Draw the background. */
+        cairo_set_source_rgb(context, 1, 1, 1);
+        cairo_rectangle(context, 0, 0, surface_width, surface_height);
+        cairo_fill(context);
+
+        /* Draw a moving sine wave. */
+        cairo_set_source_rgb(context, 0.5, 0.5, 0);
+
+        unsigned char *current_row;
+        current_row = cairo_image_surface_get_data(surface);
+        int stride = cairo_image_surface_get_stride(surface);
+        uint8_t *pf;
+        pf = &playfield[0];
+        for (int y = 0; y < HEIGHT; y++)
+        {
+            uint32_t *row = (void *)current_row;
+            for (int x = 0; x < WIDTH; x++)
+            {
+                uint32_t r = *pf++;
+                uint32_t g = *pf++;
+                uint32_t b = *pf++;
+                row[x] = (r << 16) | (g << 8) | b;
+            }
+
+            current_row += stride;
+        }
+        // cairo_surface_mark_dirty(surface);
+
+        gameLoop();
+
+        // end draw
+
+        cairo_stroke(context);
+
+        cairo_destroy(context);
+
+        pthread_mutex_unlock(&mutex);
     }
-
-    gameLoop();
-
-    // end draw
-
-    cairo_stroke(context);
-
-    cairo_destroy(context);
-
-    pthread_mutex_unlock(&mutex);
-    currently_drawing = 0;
-
     return NULL;
 }
+
 /* EOF */

@@ -46,9 +46,9 @@ bool firstFrame = false;
 bool displayPauseState = true;
 
 bool paused = true;             // Player pause, also you can set pause=true to pause the display while loading files/between levels
-volatile int nextFrameFlag = 0; // The 30Hz IRS incs this, Core0 Loop responds when it reaches 2 or greater
-bool drawFrameFlag = false;     // When Core0 Loop responses to nextFrameFlag, it sets this flag so Core1 will know to render a frame
-bool frameDrawing = false;      // Set TRUE when Core1 is drawing the display. Core0 should wait for this to clear before accessing video memory
+//volatile int nextFrameFlag = 0; // The 30Hz IRS incs this, Core0 Loop responds when it reaches 2 or greater
+//bool drawFrameFlag = false;     // When Core0 Loop responses to nextFrameFlag, it sets this flag so Core1 will know to render a frame
+//bool frameDrawing = false;      // Set TRUE when Core1 is drawing the display. Core0 should wait for this to clear before accessing video memory
 
 // Your game variables here:
 int xPos = 0;
@@ -7328,4 +7328,9 @@ void go_init(int index)
     object[index].stunTimer = 0;
     object[index].speedPixels = 1;
     object[index].whenBudTouch = 0;
+}
+
+void quitGame() {
+    closeFile();
+    musicStop();
 }

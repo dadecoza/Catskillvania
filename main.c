@@ -1,14 +1,3 @@
-/*!
- * \brief A simple animation using cairo and GTK+
- *
- * This program shows high /usr/libexec/Xorg load while running full screen on Linux
- *
- * Compile with:
- *   gcc `pkg-config --cflags --libs gtk+-3.0` -lm -lpthread main.c
- *
- * or run: make -B all
- */
-
 #include <gtk/gtk.h>
 #include <pthread.h>
 #include "catskillgfx.h"
@@ -18,6 +7,7 @@
 
 #define WIDTH 240
 #define HEIGHT 240
+#define LOOP_DELAY_IN_MS 10
 
 /* Local variables. */
 static pthread_t drawing_thread;
@@ -44,6 +34,11 @@ gboolean keyrelease_function(GtkWidget *widget, GdkEventKey *event, gpointer dat
     uint16_t k = event->keyval;
     setButton(k, false);
     return TRUE;
+}
+
+void close_game(GtkWidget * window, gpointer data) {
+  quitGame();
+  gtk_main_quit(); 
 }
 
 int main(int argc, char **argv)
@@ -76,6 +71,7 @@ int main(int argc, char **argv)
     g_signal_connect(drawing_area, "draw", G_CALLBACK(drawing_area_draw_cb), NULL);
 
     /* Connect the destroy signal. */
+    g_signal_connect(main_window, "delete-event", G_CALLBACK(close_game), NULL);
     g_signal_connect(main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     g_signal_connect(G_OBJECT(main_window), "key_press_event", G_CALLBACK(keypress_function), NULL);
@@ -113,8 +109,6 @@ drawing_area_configure_cb(GtkWidget *widget, GdkEventConfigure *event)
         surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, WIDTH, HEIGHT);
         surface_width = WIDTH;
         surface_height = HEIGHT;
-        int stride = cairo_image_surface_get_stride(surface);
-        printf("%d %d %d\n", surface_width, surface_height, stride);
         pthread_mutex_unlock(&mutex);
     }
 
@@ -141,22 +135,22 @@ drawing_area_draw_cb(GtkWidget *widget, cairo_t *context, void *ptr)
 static void *
 thread_draw(void *ptr)
 {
-    int msec = 0, trigger = 10; /* 10ms */
+    int msec = 0;
     clock_t before = clock();
     while (1)
     {
-        clock_t difference = clock() - before;
-        msec = difference * 1000 / CLOCKS_PER_SEC;
-        if (msec < trigger)
-        {
-            continue;
-        }
-        before = clock();
-
         if (surface == (cairo_surface_t *)NULL)
         {
             continue;
         }
+
+        clock_t difference = clock() - before;
+        msec = difference * 1000 / CLOCKS_PER_SEC;
+        if (msec < LOOP_DELAY_IN_MS)
+        {
+            continue;
+        }
+        before = clock();
 
         pthread_mutex_lock(&mutex);
 
@@ -200,7 +194,6 @@ thread_draw(void *ptr)
 
         pthread_mutex_unlock(&mutex);
     }
-
     return NULL;
 }
 

@@ -123,4 +123,5 @@ bool go_hitBox(int index,int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 bool go_hitBoxSmall(int index,int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 void go_init(int index);
 void playTrack(int, bool);
+void quitGame();
 #endif

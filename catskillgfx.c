@@ -1075,7 +1075,7 @@ void drawPlayfield()
     {
         RenderRow();
         drawLineOfPlayfield(&linebuffer[whichBuffer][0], 3840);
-
+        
         if (++whichBuffer > 1)
         { // Switch up buffers, we will draw the next while the prev is being DMA'd to LCD
             whichBuffer = 0;
@@ -1349,6 +1349,9 @@ bool readBool()
 
 void closeFile()
 { // Closes the active file
+    if (!fileActive) {
+        return;
+    }
     fclose(file);
     fileActive = false;
 }

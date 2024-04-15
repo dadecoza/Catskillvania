@@ -6898,37 +6898,37 @@ void playTrack(int track, bool doloop)
     switch (track)
     {
     case 0:
-        musicPlay("music/Castlevania1.nsfe", 10); // ??
+        musicPlay("music/Castlevania1.nsf", 9); // ??
         break;
     case 1:
-        musicPlay("music/Castlevania1.nsfe", 1);
+        musicPlay("music/Castlevania1.nsf", 1);
         break;
     case 2:
-        musicPlay("music/Castlevania3.nsfe", 13);
+        musicPlay("music/Castlevania3.nsf", 8);
         break;
     case 3:
-        musicPlay("music/Castlevania3.nsfe", 10);
+        musicPlay("music/Castlevania3.nsf", 5);
         break;
     case 4:
-        musicPlay("music/Castlevania1.nsfe", 5);
+        musicPlay("music/Castlevania1.nsf", 3);
         break;
     case 5:
-        musicPlay("music/Castlevania1.nsfe", 7);
+        musicPlay("music/Castlevania1.nsf", 4);
         break;
     case 9:
-        musicPlay("music/Castlevania1.nsfe", 0);
+        musicPlay("music/Castlevania1.nsf", 0);
         break;
     case 10:
-        musicPlay("music/Castlevania3.nsfe", 20);
+        musicPlay("music/Castlevania3.nsf", 17);
         break;
     case 11:
-        musicPlay("music/Castlevania3.nsfe", 27);
+        musicPlay("music/Castlevania3.nsf", 19);
         break;
     case 12:
-        musicPlay("music/Castlevania3.nsfe", 5);
+        musicPlay("music/Castlevania3.nsf", 20);
         break;
     case 13:
-        musicPlay("music/Castlevania3.nsfe", 24);
+        musicPlay("music/Castlevania3.nsf", 24);
         break;
     }
     currentTrack = track;

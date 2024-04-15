@@ -6925,7 +6925,7 @@ void playTrack(int track, bool doloop)
         musicPlay("music/Castlevania3.nsf", 19);
         break;
     case 12:
-        musicPlay("music/Castlevania3.nsf", 20);
+        musicPlay("music/Castlevania1.nsf", 6);
         break;
     case 13:
         musicPlay("music/Castlevania3.nsf", 24);

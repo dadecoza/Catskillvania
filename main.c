@@ -103,7 +103,7 @@ int main(int argc, char **argv)
     g_signal_connect(G_OBJECT(main_window), "key_press_event", G_CALLBACK(keypress_function), NULL);
     g_signal_connect(G_OBJECT(main_window), "key_release_event", G_CALLBACK(keyrelease_function), NULL);
 
-    g_timeout_add(1000 / 180, (GSourceFunc)timer_exe, drawing_area);
+    g_timeout_add(1000 / 120, (GSourceFunc)timer_exe, drawing_area);
 
     gtk_main();
 }

@@ -1,10 +1,36 @@
+/*!
+ * \brief A simple animation using cairo and GTK+
+ *
+ * This program shows high /usr/libexec/Xorg load while running full screen on Linux
+ *
+ * Compile with:
+ *   gcc `pkg-config --cflags --libs gtk+-3.0` -lm -lpthread main.c
+ *
+ * or run: make -B all
+ */
+
 #include <gtk/gtk.h>
+#include <pthread.h>
 #include "catskillgfx.h"
 #include "catskillgame.h"
+#include <stdio.h>
+#include <time.h>
 
-GtkImage *image;
-GdkPixbuf *pb;
-GdkPixbuf *pbs;
+#define WIDTH 240
+#define HEIGHT 240
+
+/* Local variables. */
+static pthread_t drawing_thread;
+static pthread_mutex_t mutex;
+static cairo_surface_t *surface = NULL;
+static int surface_width;
+static int surface_height;
+
+/* Local function prototypes. */
+static gboolean invalidate_cb(void *);
+static gboolean drawing_area_configure_cb(GtkWidget *, GdkEventConfigure *);
+static void drawing_area_draw_cb(GtkWidget *, cairo_t *, void *);
+static void *thread_draw(void *);
 
 gboolean keypress_function(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
@@ -20,34 +46,162 @@ gboolean keyrelease_function(GtkWidget *widget, GdkEventKey *event, gpointer dat
     return TRUE;
 }
 
-gboolean main_loop(GtkWidget *widget, GdkFrameClock *clock, gpointer data)
-{
-    pb = gdk_pixbuf_new_from_data(playfield, GDK_COLORSPACE_RGB, 0, 8, COLS, ROWS, COLS * BYTES_PER_PIXEL, NULL, NULL);
-    pbs = gdk_pixbuf_scale_simple(pb, COLS * 2, ROWS * 2, GDK_INTERP_BILINEAR);
-    gtk_image_set_from_pixbuf(GTK_IMAGE(image), pbs);
-    g_object_unref(pb);
-    g_object_unref(pbs);
-    gameLoop();
-    return 1;
-}
-
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
     gameSetup();
     gtk_init(&argc, &argv);
-    image = GTK_IMAGE(gtk_image_new());
-    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), "Catskillvania");
-    gtk_window_set_default_size(GTK_WINDOW(window), (COLS * 2) + 10, (ROWS * 2) + 10);
-    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+
+    GtkWidget *main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(main_window), "Catskillvania");
     GdkPixbuf *icon = gdk_pixbuf_new_from_file("UI/Catskillvania.ico", NULL);
-    gtk_window_set_icon(GTK_WINDOW(window), icon);
-    gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(image));
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    g_signal_connect(G_OBJECT(window), "key_press_event", G_CALLBACK(keypress_function), NULL);
-    g_signal_connect(G_OBJECT(window), "key_release_event", G_CALLBACK(keyrelease_function), NULL);
-    gtk_widget_add_tick_callback(window, main_loop, NULL, NULL);
-    gtk_widget_show_all(window);
+    gtk_window_set_icon(GTK_WINDOW(main_window), icon);
+    gtk_window_set_default_size(GTK_WINDOW(main_window), (WIDTH * 2) + 10, (HEIGHT * 2) + 10);
+    gtk_window_set_resizable(GTK_WINDOW(main_window), FALSE);
+    GtkWidget *drawing_area = gtk_drawing_area_new();
+
+    /* Connect to the configure event to create the surface. */
+    g_signal_connect(drawing_area, "configure-event", G_CALLBACK(drawing_area_configure_cb), NULL);
+
+    gtk_container_add(GTK_CONTAINER(main_window), drawing_area);
+    gtk_widget_show_all(main_window);
+
+    /* Create a new thread to update the stored surface. */
+    pthread_mutex_init(&mutex, NULL);
+    pthread_create(&drawing_thread, NULL, thread_draw, NULL);
+
+    /* Create a  timer to invalidate our window at 60Hz, and display the stored surface. */
+    g_timeout_add(1000 / 60, invalidate_cb, drawing_area);
+
+    /* Connect our redraw callback. */
+    g_signal_connect(drawing_area, "draw", G_CALLBACK(drawing_area_draw_cb), NULL);
+
+    /* Connect the destroy signal. */
+    g_signal_connect(main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    g_signal_connect(G_OBJECT(main_window), "key_press_event", G_CALLBACK(keypress_function), NULL);
+    g_signal_connect(G_OBJECT(main_window), "key_release_event", G_CALLBACK(keyrelease_function), NULL);
+
     gtk_main();
-    return 0;
 }
+
+static gboolean
+invalidate_cb(void *ptr)
+{
+    if (GTK_IS_WIDGET(ptr))
+    {
+        gtk_widget_queue_draw(GTK_WIDGET(ptr));
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+static gboolean
+drawing_area_configure_cb(GtkWidget *widget, GdkEventConfigure *event)
+{
+    if (event->type == GDK_CONFIGURE)
+    {
+        pthread_mutex_lock(&mutex);
+
+        if (surface != (cairo_surface_t *)NULL)
+        {
+            cairo_surface_destroy(surface);
+        }
+
+        GtkAllocation allocation;
+        gtk_widget_get_allocation(widget, &allocation);
+        surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, WIDTH, HEIGHT);
+        surface_width = WIDTH;
+        surface_height = HEIGHT;
+        int stride = cairo_image_surface_get_stride(surface);
+        printf("%d %d %d\n", surface_width, surface_height, stride);
+        pthread_mutex_unlock(&mutex);
+    }
+
+    return TRUE;
+}
+
+static void
+drawing_area_draw_cb(GtkWidget *widget, cairo_t *context, void *ptr)
+{
+    /* Copy the contents of the surface to the current context. */
+    pthread_mutex_lock(&mutex);
+
+    if (surface != (cairo_surface_t *)NULL)
+    {
+        cairo_scale(context, 2, 2);
+        // cairo_translate(context, 1, 1);
+        cairo_set_source_surface(context, surface, 2, 2);
+        cairo_paint(context);
+    }
+
+    pthread_mutex_unlock(&mutex);
+}
+
+static void *
+thread_draw(void *ptr)
+{
+    int msec = 0, trigger = 10; /* 10ms */
+    clock_t before = clock();
+    while (1)
+    {
+        clock_t difference = clock() - before;
+        msec = difference * 1000 / CLOCKS_PER_SEC;
+        if (msec < trigger)
+        {
+            continue;
+        }
+        before = clock();
+
+        if (surface == (cairo_surface_t *)NULL)
+        {
+            continue;
+        }
+
+        pthread_mutex_lock(&mutex);
+
+        cairo_t *context = cairo_create(surface);
+
+        /* Draw the background. */
+        cairo_set_source_rgb(context, 1, 1, 1);
+        cairo_rectangle(context, 0, 0, surface_width, surface_height);
+        cairo_fill(context);
+
+        /* Draw a moving sine wave. */
+        cairo_set_source_rgb(context, 0.5, 0.5, 0);
+
+        unsigned char *current_row;
+        current_row = cairo_image_surface_get_data(surface);
+        int stride = cairo_image_surface_get_stride(surface);
+        uint8_t *pf;
+        pf = &playfield[0];
+        for (int y = 0; y < HEIGHT; y++)
+        {
+            uint32_t *row = (void *)current_row;
+            for (int x = 0; x < WIDTH; x++)
+            {
+                uint32_t r = *pf++;
+                uint32_t g = *pf++;
+                uint32_t b = *pf++;
+                row[x] = (r << 16) | (g << 8) | b;
+            }
+
+            current_row += stride;
+        }
+        // cairo_surface_mark_dirty(surface);
+
+        gameLoop();
+
+        // end draw
+
+        cairo_stroke(context);
+
+        cairo_destroy(context);
+
+        pthread_mutex_unlock(&mutex);
+    }
+
+    return NULL;
+}
+
+/* EOF */

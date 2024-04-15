@@ -4,7 +4,7 @@
 
  [Benheck's](https://github.com/benheck) original source code for the [gameBadge3](https://github.com/benheck/gamebadge3).
 
-![Game](https://github.com/dadecoza/Catskillvania/blob/main/UI/Catskill.gif?raw=true)
+![Game](https://github.com/dadecoza/Catskillvania/blob/main/UI/Screenshot.png?raw=true)
 
 # Dependencies
 * libgtk-3-dev

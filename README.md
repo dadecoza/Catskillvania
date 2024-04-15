@@ -34,6 +34,13 @@ make
 ./catskill
 ```
 
+# Game speed
+You can change the game speed by passing a number between 100 (slower) and 300 (faster) as a command line argument.
+```
+catskill.exe 100
+```
+The default is 200.
+
 # Useful links
 ### Awsome open source libraries
 * https://www.gtk.org/

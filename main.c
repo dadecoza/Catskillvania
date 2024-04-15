@@ -6,6 +6,8 @@
 #include <time.h>
 
 
+// not really related to FPS the higher the number the faster the 
+// framerate
 #define SPEED 180
 
 #define WIDTH 240

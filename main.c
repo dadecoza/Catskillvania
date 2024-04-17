@@ -11,8 +11,6 @@
 static pthread_t drawing_thread;
 static pthread_mutex_t mutex;
 static cairo_surface_t *surface = NULL;
-static int surface_width;
-static int surface_height;
 static int currently_drawing = 0;
 static gboolean drawing_area_configure_cb(GtkWidget *, GdkEventConfigure *);
 static void drawing_area_draw_cb(GtkWidget *, cairo_t *, void *);
@@ -52,10 +50,10 @@ gboolean timer_exe(GtkWidget *window)
             pthread_join(thread_info, NULL);
         }
         pthread_create(&thread_info, NULL, thread_draw, NULL);
-    }
-    if (GTK_IS_WIDGET(window))
-    {
-        gtk_widget_queue_draw(GTK_WIDGET(window));
+        if (GTK_IS_WIDGET(window))
+        {
+            gtk_widget_queue_draw(GTK_WIDGET(window));
+        }
     }
     first_execution = FALSE;
     return TRUE;
@@ -110,11 +108,7 @@ drawing_area_configure_cb(GtkWidget *widget, GdkEventConfigure *event)
         {
             cairo_surface_destroy(surface);
         }
-        GtkAllocation allocation;
-        gtk_widget_get_allocation(widget, &allocation);
         surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, COLS, ROWS);
-        surface_width = COLS;
-        surface_height = ROWS;
         pthread_mutex_unlock(&mutex);
     }
 
@@ -131,7 +125,6 @@ drawing_area_draw_cb(GtkWidget *widget, cairo_t *context, void *ptr)
         cairo_set_source_surface(context, surface, 2, 2);
         cairo_paint(context);
     }
-
     pthread_mutex_unlock(&mutex);
 }
 

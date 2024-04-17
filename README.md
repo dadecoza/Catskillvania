@@ -4,7 +4,7 @@
 
  [Benheck's](https://github.com/benheck) original source code for the [gameBadge3](https://github.com/benheck/gamebadge3).
 
-![Game](https://github.com/dadecoza/Catskillvania/blob/main/UI/Catskill.gif?raw=true)
+![Game](https://github.com/dadecoza/Catskillvania/blob/main/UI/Screenshot.png?raw=true)
 
 # Dependencies
 * libgtk-3-dev
@@ -33,6 +33,13 @@ cd Catskillvania
 make
 ./catskill
 ```
+
+# Game speed
+You can change the game speed by passing a number between 100 (slower) and 300 (faster) as a command line argument.
+```
+catskill.exe 100
+```
+The default is 200.
 
 # Useful links
 ### Awsome open source libraries

@@ -6,7 +6,7 @@
 #include <time.h>
 
 // higher the number the faster the framerate
-#define SPEED 200
+#define SPEED 120
 
 static pthread_t drawing_thread;
 static pthread_mutex_t mutex;

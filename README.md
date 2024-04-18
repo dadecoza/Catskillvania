@@ -39,7 +39,7 @@ You can change the game speed by passing a number between 100 (slower) and 300 (
 ```
 catskill.exe 100
 ```
-The default is 200.
+The default is 120.
 
 # Useful links
 ### Awsome open source libraries

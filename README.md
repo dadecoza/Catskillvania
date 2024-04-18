@@ -1,6 +1,6 @@
 # <img src="https://raw.githubusercontent.com/dadecoza/Catskillvania/main/UI/Catskillvania.ico" alt="Bud" height="28px" /> Catskillvania - CONDO of BUD
 
- [Windows Download](https://github.com/dadecoza/Catskillvania/releases/download/eighth/catskill_win64_202404153.zip)
+ [Windows Download](https://github.com/dadecoza/Catskillvania/releases/download/ninth/catskill_win64_20240418.zip)
 
  [Benheck's](https://github.com/benheck) original source code for the [gameBadge3](https://github.com/benheck/gamebadge3).
 

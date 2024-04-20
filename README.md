@@ -42,7 +42,7 @@ catskill.exe 100
 The default is 120.
 
 # Useful links
-### Awsome open source libraries
+### Awesome open source libraries
 * https://www.gtk.org/
 * https://github.com/libgme/game-music-emu
 * https://miniaud.io/index.html
